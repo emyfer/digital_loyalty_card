@@ -15,7 +15,11 @@ router.get("/", async (req, res) => {
     [auth0Id]
   );
 
-  res.render("home", { points: result.rows[0].broj_bodova });
+  const rewards = await pool.query(
+    "SELECT * FROM nagrada ORDER BY naziv"
+  );
+
+  res.render("home", { points: result.rows[0].broj_bodova, rewards: rewards.rows });
 });
 
 module.exports = router;

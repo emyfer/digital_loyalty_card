@@ -9,5 +9,34 @@
     <h1>Upravljanje nagradama</h1>
     <p>Admin stranica</p>
     <a href="/logout">Logout</a>
+
+    <div>
+      <h1>Upravljanje nagradama</h1>
+
+      <!-- FORMA ZA DODAVANJE -->
+      <form action="/rewards/add" method="POST">
+        <input type="text" name="naziv" placeholder="Naziv" required />
+        <input type="text" name="slika" placeholder="URL slike" required />
+        <input type="number" name="potrebni_bodovi" placeholder="Bodovi" required />
+        <button type="submit">Dodaj</button>
+      </form>
+
+      <hr/>
+
+      <!-- PRIKAZ SVIH NAGRADA -->
+      <% rewards.forEach(r => { %>
+        <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+          <h3><%= r.naziv %></h3>
+          <img src="<%= r.slika %>" width="100" />
+
+          <p>Bodovi: <%= r.potrebni_bodovi %></p>
+
+          <!-- DELETE GUMB -->
+          <form action="/rewards/<%= r.nagrada_id %>?_method=DELETE" method="POST">
+            <button style="color:red;">🗑 Delete</button>
+          </form>
+        </div>
+      <% }) %>
+    </div>
   </body>
 </html>
