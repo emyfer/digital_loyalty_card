@@ -13,7 +13,6 @@
     <div>
       <h1>Upravljanje nagradama</h1>
 
-      <!-- FORMA ZA DODAVANJE -->
       <form action="/rewards/add" method="POST">
         <input type="text" name="naziv" placeholder="Naziv" required />
         <input type="text" name="slika" placeholder="URL slike" required />
@@ -23,7 +22,6 @@
 
       <hr/>
 
-      <!-- PRIKAZ SVIH NAGRADA -->
       <% rewards.forEach(r => { %>
         <div style="border:1px solid #ccc; padding:10px; margin:10px;">
           <h3><%= r.naziv %></h3>
@@ -31,7 +29,6 @@
 
           <p>Bodovi: <%= r.potrebni_bodovi %></p>
 
-          <!-- DELETE GUMB -->
           <form action="/rewards/<%= r.nagrada_id %>?_method=DELETE" method="POST">
             <button style="color:red;">🗑 Delete</button>
           </form>

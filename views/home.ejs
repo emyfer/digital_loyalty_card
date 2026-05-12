@@ -14,15 +14,10 @@
             <% rewards.forEach(r => { %>
                 <% if (r.potrebni_bodovi <= points) {%>
                     <div style="border:1px solid #ccc; padding:10px; margin:10px;">
-                    <h3><%= r.naziv %></h3>
-                    <img src="<%= r.slika %>" width="100" />
+                        <h3><%= r.naziv %></h3>
+                        <img src="<%= r.slika %>" width="100" />
 
-                    <p>Bodovi: <%= r.potrebni_bodovi %></p>
-
-                    <!-- DELETE GUMB -->
-                    <form action="/rewards/<%= r.nagrada_id %>?_method=DELETE" method="POST">
-                        <button style="color:red;">🗑 Delete</button>
-                    </form>
+                        <p>Bodovi: <%= r.potrebni_bodovi %></p>
                     </div>
                 <% } %>
             <% }) %>
