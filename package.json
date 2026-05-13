@@ -17,6 +17,7 @@
     "express-openid-connect": "^2.20.2",
     "method-override": "^3.0.0",
     "nodemon": "^3.1.14",
-    "pg": "^8.20.0"
+    "pg": "^8.20.0",
+    "uuid": "^14.0.0"
   }
 }

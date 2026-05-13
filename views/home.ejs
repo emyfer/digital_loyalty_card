@@ -6,21 +6,41 @@
         <title>Document</title>
     </head>
     <body>
-        <h1>Moji bodovi</h1>
-        <p>Trenutni broj bodova: <%= points %></p>
-        <a href="/logout">Logout</a>
+        <h1>Moji bodovi: <%= points %></h1>
 
-        <div>
-            <% rewards.forEach(r => { %>
-                <% if (r.potrebni_bodovi <= points) {%>
-                    <div style="border:1px solid #ccc; padding:10px; margin:10px;">
-                        <h3><%= r.naziv %></h3>
-                        <img src="<%= r.slika %>" width="100" />
+        <h2>Dostupne nagrade</h2>
 
-                        <p>Bodovi: <%= r.potrebni_bodovi %></p>
-                    </div>
-                <% } %>
-            <% }) %>
+        <% rewards.forEach(r => { %>
+            <div style="border:1px solid black; padding:10px; margin:10px;">
+                <h3><%= r.naziv %></h3>
+                <img src="<%= r.slika %>" width="100px">
+                <p>Bodovi: <%= r.potrebni_bodovi %></p>
+
+                <button onclick="openModal('<%= r.nagrada_id %>')">
+                    Iskoristi
+                </button>
+            </div>
+        <% }) %>
+
+        <div id="modal" style="display:none; position:fixed; top:30%; left:40%; background:white; padding:20px; border:1px solid black;">
+            <p>Sigurno želiš iskoristiti ovu nagradu?</p>
+
+            <form id="redeemForm" method="POST">
+                <button type="submit">DA, iskoristi</button>
+            </form>
+
+            <button onclick="closeModal()">Odustani</button>
         </div>
+
+        <script>
+            function openModal(id) {
+                document.getElementById("redeemForm").action = "/home/redeem/" + id;
+                document.getElementById("modal").style.display = "block";
+            }
+
+            function closeModal() {
+                document.getElementById("modal").style.display = "none";
+            }
+        </script>
     </body>
 </html>
