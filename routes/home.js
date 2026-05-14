@@ -18,7 +18,6 @@ router.get("/", async (req, res) => {
 
   const kartica = karticaResult.rows[0];
 
-  // dohvati nagrade koje može iskoristiti
   const nagradeResult = await pool.query(
     `SELECT * FROM nagrada
      WHERE potrebni_bodovi <= $1`,
@@ -80,6 +79,75 @@ router.post("/redeem/:id", async (req, res) => {
   } catch (err) {
     await client.query("ROLLBACK");
     console.error(err);
+  } finally {
+    client.release();
+  }
+
+  res.redirect("/home");
+});
+
+router.get("/scan", async (req, res) => {
+  if (!req.oidc.isAuthenticated()) return res.redirect("/");
+
+  const { kod_id } = req.query;
+  const auth0Id = req.oidc.user.sub;
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const kodResult = await client.query(
+      `SELECT * FROM qr_kod
+       WHERE kod_id = $1
+       AND aktivan = true
+       AND NOW() - vrijeme_kreiranja <= interval '30 minutes'`,
+      [kod_id]
+    );
+
+    if (kodResult.rows.length === 0) {
+      throw new Error("QR kod nije valjan");
+    }
+
+    const karticaResult = await client.query(
+      `SELECT k.kartica_id
+       FROM kartica_lojalnosti k
+       JOIN korisnik u ON u.korisnik_id = k.korisnik_id
+       WHERE u.auth0_id = $1`,
+      [auth0Id]
+    );
+
+    const karticaId = karticaResult.rows[0].kartica_id;
+
+    const exists = await client.query(
+      `SELECT * FROM transakcija_bodova
+       WHERE kartica_id = $1
+       AND kod_id = $2`,
+      [karticaId, kod_id]
+    );
+
+    if (exists.rows.length > 0) {
+      throw new Error("Već iskorišten kod");
+    }
+
+    await client.query(
+      `UPDATE kartica_lojalnosti
+       SET broj_bodova = broj_bodova + 1
+       WHERE kartica_id = $1`,
+      [karticaId]
+    );
+
+    await client.query(
+      `INSERT INTO transakcija_bodova (kartica_id, kod_id, iznos)
+       VALUES ($1, $2, 1)`,
+      [karticaId, kod_id]
+    );
+
+    await client.query("COMMIT");
+
+  } catch (err) {
+    await client.query("ROLLBACK");
+    return res.status(400).send(err.message);
   } finally {
     client.release();
   }

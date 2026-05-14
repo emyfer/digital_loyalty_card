@@ -9,5 +9,28 @@
         <h1>QR Kod generiranje</h1>
         <p>Konobar stranica</p>
         <a href="/logout">Logout</a>
+
+        <div>
+            <h1>Upravljanje kafićem</h1>
+
+            <form action="/qr_code/open" method="POST">
+                <button type="submit">Otvaram kafić</button>
+            </form>
+
+            <form action="/qr_code/close" method="POST">
+                <button type="submit">Zatvaram kafić</button>
+            </form>
+
+            <hr/>
+
+            <% if (activeCode) { %>
+                <h2>Aktivni QR kod</h2>
+                <p>Vrijedi 30 minuta</p>
+
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://localhost:3000/home/scan?kod_id=<%= activeCode.kod_id %>">
+            <% } else { %>
+                <p>Nema aktivnog koda</p>
+            <% } %>
+        </div>
     </body>
 </html>
