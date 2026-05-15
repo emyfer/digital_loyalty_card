@@ -3,110 +3,109 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Korisnici</title>
+  <title>Admin</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
-  <h1>Pregled korisnika</h1>
+  <nav class="navbar">
+    <div class="navbar-brand">Admin</div>
+    <div class="navbar-links">
+      <a href="/rewards">Rewards</a>
+      <a href="/logout">Log out</a>
+    </div>
+  </nav>
 
-  <a href="/rewards">← Natrag na nagrade</a>
-  <a href="/logout" style="margin-left:20px;">Logout</a>
+  <div class="page-wrapper">
 
-  <hr/>
+    <h1>Users</h1>
 
-  <form method="GET" action="/users">
-    <label>Filtriraj po iskorištenoj nagradi:</label>
+    <form method="GET" action="/users">
+      <div class="filter-row">
+        <select name="nagrada_id">
+          <option value="">— all users —</option>
+          <% nagrade.forEach(n => { %>
+            <option
+              value="<%= n.nagrada_id %>"
+              <%= filterNagradaId === n.nagrada_id ? 'selected' : '' %>
+            >
+              <%= n.naziv %> (<%= n.potrebni_bodovi %> bodova)
+            </option>
+          <% }) %>
+        </select>
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <% if (filterNagradaId) { %>
+          <a href="/users" class="btn btn-outline">✕ Remove</a>
+        <% } %>
+      </div>
+    </form>
 
-    <select name="nagrada_id">
-      <option value="">-- svi korisnici --</option>
-      <% nagrade.forEach(n => { %>
-        <option
-          value="<%= n.nagrada_id %>"
-          <%= filterNagradaId === n.nagrada_id ? 'selected' : '' %>
-        >
-          <%= n.naziv %> (<%= n.potrebni_bodovi %> bodova)
-        </option>
-      <% }) %>
-    </select>
+    <div class="section-title">Users</div>
 
-    <button type="submit">Filtriraj</button>
+    <% if (korisnici.length === 0) { %>
+      <div class="empty-state">
+        No users for selected filter
+      </div>
 
-    <% if (filterNagradaId) { %>
-      <a href="/users">Poništi filter</a>
+    <% } else { %>
+      <div class="card" style="padding:0; overflow:hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Points</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% korisnici.forEach(k => { %>
+              <tr class="user-row">
+                <td style="font-weight:500;"><%= k.ime %></td>
+                <td style="color:var(--text-muted);font-size:.88rem;"><%= k.email %></td>
+                <td><span class="points-badge"><%= k.broj_bodova %></span></td>
+                <td style="text-align:right;">
+                  <button
+                    class="btn btn-outline"
+                    style="font-size:.8rem; padding:.4rem .9rem;"
+                    onclick="openDetail('<%= k.ime %>','<%= k.email %>','<%= k.broj_bodova %>','<%= k.korisnik_id %>')"
+                  >
+                    Detalji →
+                  </button>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
     <% } %>
-  </form>
 
-  <hr/>
+  </div>
 
-  <% if (korisnici.length === 0) { %>
-    <p>Nema korisnika za odabrani filter.</p>
-  <% } else { %>
-    <table border="1" cellpadding="10">
-      <thead>
-        <tr>
-          <th>Ime</th>
-          <th>Email</th>
-          <th>Bodovi</th>
-          <th>Detalji</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% korisnici.forEach(k => { %>
-          <tr>
-            <td><%= k.ime %></td>
-            <td><%= k.email %></td>
-            <td><%= k.broj_bodova %></td>
-            <td>
-              <button onclick="openDetail(
-                '<%= k.ime %>',
-                '<%= k.email %>',
-                '<%= k.broj_bodova %>',
-                '<%= k.korisnik_id %>'
-              )">
-                Pogledaj →
-              </button>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  <% } %>
+  <div class="modal-overlay" id="detailOverlay">
+    <div class="modal" style="max-width:500px;">
 
-  <div
-    id="detailModal"
-    style="
-      display:none;
-      position:fixed;
-      top:10%;
-      left:25%;
-      width:50%;
-      background:white;
-      border:1px solid black;
-      padding:20px;
-      overflow-y:auto;
-      max-height:75vh;
-    "
-  >
-    <h2 id="modalIme"></h2>
-    <p>Email: <span id="modalEmail"></span></p>
-    <p>Bodovi: <strong id="modalBodovi"></strong></p>
+      <h2 id="modalIme"></h2>
+      <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:.3rem;">
+        <span id="modalEmail"></span>
+      </p>
+      <div style="margin-bottom:1.2rem;">
+        <div class="points-display" style="font-size:1.1rem; padding:.4rem 1rem; margin-bottom:0;">
+          <span id="modalBodovi"></span> <small>points</small>
+        </div>
+      </div>
 
-    <hr/>
+      <div class="section-title" style="margin-top:1rem;">Used rewards</div>
+      <div id="modalIskoristene"><p>Učitavanje...</p></div>
 
-    <h3>Iskorištene nagrade</h3>
-    <div id="modalIskoristene">
-      <p>Učitavanje...</p>
+      <div class="section-title">Transakcije bodova</div>
+      <div id="modalTransakcije"><p>Učitavanje...</p></div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeDetail()">Close</button>
+      </div>
+
     </div>
-
-    <hr/>
-
-    <h3>Transakcije bodova</h3>
-    <div id="modalTransakcije">
-      <p>Učitavanje...</p>
-    </div>
-
-    <br/>
-    <button onclick="closeDetail()">Zatvori</button>
   </div>
 
   <script>
@@ -114,23 +113,25 @@
       document.getElementById("modalIme").textContent = ime;
       document.getElementById("modalEmail").textContent = email;
       document.getElementById("modalBodovi").textContent = bodovi;
+      document.getElementById("modalIskoristene").innerHTML = "<p style='color:var(--text-muted)'>Učitavanje...</p>";
+      document.getElementById("modalTransakcije").innerHTML  = "<p style='color:var(--text-muted)'>Učitavanje...</p>";
+      document.getElementById("detailOverlay").classList.add("active");
 
-      document.getElementById("modalIskoristene").innerHTML = "<p>Učitavanje...</p>";
-      document.getElementById("modalTransakcije").innerHTML = "<p>Učitavanje...</p>";
-
-      document.getElementById("detailModal").style.display = "block";
-
-      const res = await fetch("/users/" + korisnikId + "/detail");
+      const res  = await fetch("/users/" + korisnikId + "/detail");
       const data = await res.json();
 
       if (data.iskoristene.length === 0) {
         document.getElementById("modalIskoristene").innerHTML =
-          "<p>Korisnik još nije iskoristio nijednu nagradu.</p>";
+          "<p style='color:var(--text-muted);font-size:.88rem;'>Korisnik još nije iskoristio nijednu nagradu.</p>";
       } else {
-        let html = "<table border='1' cellpadding='8'><thead><tr><th>Nagrada</th><th>Bodovi</th><th>Datum</th></tr></thead><tbody>";
+        let html = "<table><thead><tr><th>Reward</th><th>Points</th><th>Date</th></tr></thead><tbody>";
         data.iskoristene.forEach(i => {
-          const datum = new Date(i.vrijeme).toLocaleDateString("hr-HR");
-          html += `<tr><td>${i.naziv}</td><td>${i.potrebni_bodovi}</td><td>${datum}</td></tr>`;
+          const d = new Date(i.vrijeme).toLocaleDateString("hr-HR");
+          html += `<tr>
+            <td>${i.naziv}</td>
+            <td><span class="points-badge">${i.potrebni_bodovi}</span></td>
+            <td style="color:var(--text-muted);font-size:.85rem;">${d}</td>
+          </tr>`;
         });
         html += "</tbody></table>";
         document.getElementById("modalIskoristene").innerHTML = html;
@@ -138,12 +139,15 @@
 
       if (data.transakcije.length === 0) {
         document.getElementById("modalTransakcije").innerHTML =
-          "<p>Korisnik još nema transakcija.</p>";
+          "<p style='color:var(--text-muted);font-size:.88rem;'>No transactions.</p>";
       } else {
-        let html = "<table border='1' cellpadding='8'><thead><tr><th>Iznos</th><th>Datum</th></tr></thead><tbody>";
+        let html = "<table><thead><tr><th>Iznos</th><th>Datum</th></tr></thead><tbody>";
         data.transakcije.forEach(t => {
-          const datum = new Date(t.vrijeme).toLocaleDateString("hr-HR");
-          html += `<tr><td>+${t.iznos} bod(a)</td><td>${datum}</td></tr>`;
+          const d = new Date(t.vrijeme).toLocaleDateString("hr-HR");
+          html += `<tr>
+            <td style="color:var(--navy);font-weight:600;">+${t.iznos} bod(a)</td>
+            <td style="color:var(--text-muted);font-size:.85rem;">${d}</td>
+          </tr>`;
         });
         html += "</tbody></table>";
         document.getElementById("modalTransakcije").innerHTML = html;
@@ -151,8 +155,11 @@
     }
 
     function closeDetail() {
-      document.getElementById("detailModal").style.display = "none";
+      document.getElementById("detailOverlay").classList.remove("active");
     }
+    document.getElementById("detailOverlay").addEventListener("click", function(e) {
+      if (e.target === this) closeDetail();
+    });
   </script>
 
 </body>

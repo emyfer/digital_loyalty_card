@@ -24,7 +24,6 @@ router.get("/", async (req, res) => {
     [kartica.broj_bodova]
   );
 
-  // NOVO - dohvati iskorištene nagrade za ovog kupca
   const iskoristeneResult = await pool.query(
     `SELECT n.naziv, n.potrebni_bodovi, i.vrijeme
      FROM iskoristavanje_nagrade i
@@ -37,7 +36,7 @@ router.get("/", async (req, res) => {
   res.render("home", {
     points: kartica.broj_bodova,
     rewards: nagradeResult.rows,
-    iskoristene: iskoristeneResult.rows, // NOVO
+    iskoristene: iskoristeneResult.rows,
   });
 });
 

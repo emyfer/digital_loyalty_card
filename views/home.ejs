@@ -1,80 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
-    </head>
-    <body>
-        <h1>Moji bodovi: <%= points %></h1>
-          <a href="/logout">Logout</a>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moja kartica</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
 
+  <nav class="navbar">
+    <div class="navbar-brand">Costumer</div>
+    <div class="navbar-links">
+      <a href="/logout">Odjava</a>
+    </div>
+  </nav>
 
-        <h2>Dostupne nagrade</h2>
+  <div class="page-wrapper">
 
-        <% rewards.forEach(r => { %>
-            <div style="border:1px solid black; padding:10px; margin:10px;">
-                <h3><%= r.naziv %></h3>
-                <img src="<%= r.slika %>" width="100px">
-                <p>Bodovi: <%= r.potrebni_bodovi %></p>
+    <div style="margin-bottom:1rem;">
+      <p style="font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:.5rem;">Tvoji bodovi</p>
+      <div class="points-display">
+        <%= points %> <small>points</small>
+      </div>
+    </div>
 
-                <button onclick="openModal('<%= r.nagrada_id %>')">
-                    Iskoristi
-                </button>
-            </div>
-        <% }) %>
+    <div class="section-title">Available rewards</div>
 
-        <div id="modal" style="display:none; position:fixed; top:30%; left:40%; background:white; padding:20px; border:1px solid black;">
-            <p>Sigurno želiš iskoristiti ovu nagradu?</p>
+    <% if (rewards.length === 0) { %>
+      <div class="empty-state">
+        No available rewards. Collect points.
+      </div>
+    <% } %>
 
-            <form id="redeemForm" method="POST">
-                <button type="submit">DA, iskoristi</button>
-            </form>
+    <% rewards.forEach(r => { %>
+      <div class="reward-card">
 
-            <button onclick="closeModal()">Odustani</button>
+        <img src="<%= r.slika %>"/>
+
+        <div class="reward-card-info">
+          <h3><%= r.naziv %></h3>
+          <span class="points-badge"><%= r.potrebni_bodovi %> points</span>
         </div>
 
-        <hr/>
+        <div class="reward-card-actions">
+          <button
+            class="btn btn-primary"
+            style="font-size:.82rem; padding:.45rem 1rem;"
+            onclick="openModal('<%= r.nagrada_id %>')"
+          >
+            Use
+          </button>
+        </div>
 
-        <!-- MASTER: kartica korisnika -->
-        <h2>Moja kartica lojalnosti</h2>
-        <p>Trenutni bodovi: <strong><%= points %></strong></p>
+      </div>
+    <% }) %>
 
-        <!-- DETAIL: iskorištene nagrade -->
-        <h3>Iskorištene nagrade</h3>
+    <div class="section-title">Used rewards</div>
 
-        <% if (iskoristene.length === 0) { %>
-        <p>Još nisi iskoristio/la nijednu nagradu.</p>
-        <% } else { %>
-        <table border="1" cellpadding="8">
-            <thead>
+    <% if (iskoristene.length === 0) { %>
+      <div class="empty-state">
+        No rewards used
+      </div>
+    <% } else { %>
+      <div class="card" style="padding:0; overflow:hidden;">
+        <table>
+          <thead>
             <tr>
-                <th>Nagrada</th>
-                <th>Bodovi</th>
-                <th>Datum</th>
+              <th>Reward</th>
+              <th>Points</th>
+              <th>Date</th>
             </tr>
-            </thead>
-            <tbody>
+          </thead>
+          <tbody>
             <% iskoristene.forEach(i => { %>
-                <tr>
+              <tr>
                 <td><%= i.naziv %></td>
-                <td><%= i.potrebni_bodovi %></td>
-                <td><%= new Date(i.vrijeme).toLocaleDateString('hr-HR') %></td>
-                </tr>
+                <td><span class="points-badge"><%= i.potrebni_bodovi %></span></td>
+                <td style="color:var(--text-muted);font-size:.85rem;">
+                  <%= new Date(i.vrijeme).toLocaleDateString('hr-HR') %>
+                </td>
+              </tr>
             <% }) %>
-            </tbody>
+          </tbody>
         </table>
-        <% } %>
+      </div>
+    <% } %>
 
-        <script>
-            function openModal(id) {
-                document.getElementById("redeemForm").action = "/home/redeem/" + id;
-                document.getElementById("modal").style.display = "block";
-            }
+  </div>
 
-            function closeModal() {
-                document.getElementById("modal").style.display = "none";
-            }
-        </script>
-    </body>
+  <div class="modal-overlay" id="redeemOverlay">
+    <div class="modal" style="max-width:360px; text-align:center;">
+      <h2 style="margin-bottom:.5rem;">DO you wanna use reward?</h2>
+      <p class="confirm-sub" style="margin-bottom:1.5rem;">Points will be taken off</p>
+      <form id="redeemForm" method="POST">
+        <div class="modal-footer" style="justify-content:center;">
+          <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Use reward</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) {
+      document.getElementById("redeemForm").action = "/home/redeem/" + id;
+      document.getElementById("redeemOverlay").classList.add("active");
+    }
+    function closeModal() {
+      document.getElementById("redeemOverlay").classList.remove("active");
+    }
+    document.getElementById("redeemOverlay").addEventListener("click", function(e) {
+      if (e.target === this) closeModal();
+    });
+  </script>
+
+</body>
 </html>

@@ -10,7 +10,6 @@ router.get("/", async (req, res) => {
   const auth0Id = req.oidc.user.sub;
   const email = req.oidc.user.email;
 
-  // provjeri postoji li korisnik
   let userResult = await pool.query(
     "SELECT * FROM korisnik WHERE auth0_id = $1",
     [auth0Id]
@@ -29,7 +28,6 @@ router.get("/", async (req, res) => {
 
     korisnikId = newUser.rows[0].korisnik_id;
 
-    // default = kupac
     await pool.query(
       "INSERT INTO kupac (korisnik_id) VALUES ($1)",
       [korisnikId]
@@ -45,7 +43,6 @@ router.get("/", async (req, res) => {
     korisnikId = userResult.rows[0].korisnik_id;
   }
 
-  // 🔎 PROVJERA ROLE IZ TABLICE administrator
   const adminResult = await pool.query(
     `SELECT vrsta_admina
      FROM administrator
@@ -61,7 +58,6 @@ router.get("/", async (req, res) => {
     if (role === "konobar") return res.redirect("/qr_code");
   }
 
-  // ako nije admin → kupac
   return res.redirect("/home");
 });
 

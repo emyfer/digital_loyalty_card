@@ -3,34 +3,85 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
+
+        <title>QR Code</title>
+
+        <link rel="stylesheet" href="/style.css">
     </head>
     <body>
-        <h1>QR Kod generiranje</h1>
-        <p>Konobar stranica</p>
-        <a href="/logout">Logout</a>
 
-        <div>
-            <h1>Upravljanje kafićem</h1>
+        <nav class="navbar">
+            <div class="navbar-brand">
+                Bartender
+            </div>
 
-            <form action="/qr_code/open" method="POST">
-                <button type="submit">Otvaram kafić</button>
-            </form>
+            <div class="navbar-links">
+                <a href="/logout">Logout</a>
+            </div>
 
-            <form action="/qr_code/close" method="POST">
-                <button type="submit">Zatvaram kafić</button>
-            </form>
+        </nav>
 
-            <hr/>
+        <div class="page-wrapper">
+
+            <div class="card">
+
+            <h1>Caffee managment</h1>
+
+            <div class="cafe-actions">
+                <form action="/qr_code/open" method="POST">
+                <button class="btn btn-primary" type="submit">
+                    Open caffee
+                </button>
+
+                </form>
+
+                <form action="/qr_code/close" method="POST">
+                <button class="btn btn-danger" type="submit">
+                    ✕ Close caffee
+                </button>
+
+                </form>
+
+            </div>
+
+            </div>
+
+            <div class="section-title">
+                Active QR code
+            </div>
 
             <% if (activeCode) { %>
-                <h2>Aktivni QR kod</h2>
-                <p>Vrijedi 30 minuta</p>
+            <div class="qr-wrapper">
+                <div class="qr-box">
+                <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=http://localhost:3000/home/scan?kod_id=<%= activeCode.kod_id %>">
+                </div>
 
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://localhost:3000/home/scan?kod_id=<%= activeCode.kod_id %>">
+                <div class="card" style="text-align:center; width:100%; max-width:420px;">
+                <div style="margin-top: 1 rem;">
+                    <span class="points-badge">
+                        Valid for 30 minutes
+                    </span>
+
+                </div>
+
+                </div>
+
+            </div>
+
             <% } else { %>
-                <p>Nema aktivnog koda</p>
+
+            <div class="empty-state card">
+                <h2>No active coda</h2>
+                <p style="margin-top:.5rem;">
+                    Open caffe to get the QR code
+                </p>
+
+            </div>
+
             <% } %>
+
         </div>
+
     </body>
 </html>

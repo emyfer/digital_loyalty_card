@@ -25,25 +25,21 @@ router.get("/", async (req, res) => {
   const admin = await isSuperAdmin(korisnikId);
   if (!admin) return res.status(403).send("Access denied");
 
-  // filter po nagradi (FK padajuća lista)
   const filterNagradaId = req.query.nagrada_id || "";
 
-  // dohvati sve nagrade za padajuću listu
   const nagradeResult = await pool.query(
     "SELECT * FROM nagrada ORDER BY naziv"
   );
 
-  // dohvati korisnike (kupce) s brojem bodova
   let korisnici;
   if (filterNagradaId) {
-    // samo korisnici koji su iskoristili odabranu nagradu
     korisnici = await pool.query(
       `SELECT DISTINCT k.korisnik_id, k.ime, k.email, kl.broj_bodova, kl.kartica_id
        FROM korisnik k
        JOIN kupac ku ON ku.korisnik_id = k.korisnik_id
        JOIN kartica_lojalnosti kl ON kl.korisnik_id = k.korisnik_id
        JOIN iskoristavanje_nagrade i ON i.kartica_id = kl.kartica_id
-       WHERE i.nagrada_id = $1
+       WHERE i.nagrada_id = $1 AND k.uloga = 'kupac'
        ORDER BY k.ime`,
       [filterNagradaId]
     );
@@ -53,6 +49,7 @@ router.get("/", async (req, res) => {
        FROM korisnik k
        JOIN kupac ku ON ku.korisnik_id = k.korisnik_id
        JOIN kartica_lojalnosti kl ON kl.korisnik_id = k.korisnik_id
+       WHERE k.uloga = 'kupac'
        ORDER BY k.ime`
     );
   }

@@ -1,158 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
 
-  <title>Rewards</title>
-</head>
-<body>
+    <nav class="navbar">
+      <div class="navbar-brand">Admin</div>
+      <div class="navbar-links">
+        <a href="/users">Users</a>
+        <a href="/logout">Log out</a>
+      </div>
+    </nav>
 
-  <h1>Upravljanje nagradama</h1>
+    <div class="page-wrapper">
 
-  <a href="/logout">Logout</a>
-  <a href="/users">👥 Pregled korisnika</a>
+      <h1>Upravljanje nagradama</h1>
+      <p style="margin-bottom:2rem;">Dodaj, uredi ili ukloni nagrade.</p>
 
-  <hr/>
+      <div class="card" style="margin-bottom:2rem;">
+        <h2 style="margin-bottom:1.2rem;">Nova nagrada</h2>
+        <form action="/rewards/add" method="POST">
+          <div class="add-form">
+            <input type="text" name="naziv" placeholder="Reward name" required />
+            <input type="text" name="slika" placeholder="URL slike" required />
+            <input type="number" name="potrebni_bodovi" placeholder="Bodovi" required min="1" />
+            <button type="submit" class="btn btn-primary">+ Add</button>
+          </div>
+        </form>
+      </div>
 
-  <!-- DODAVANJE -->
-  <form action="/rewards/add" method="POST">
+      <div class="search-row">
+        <form method="GET" action="/rewards" style="display:flex;gap:.5rem;width:100%;">
+          <input
+            type="text"
+            name="search"
+            placeholder="search rewards..."
+            value="<%= search %>"
+          />
+          <button type="submit" class="btn btn-outline">Search</button>
+        </form>
+      </div>
 
-    <input type="text" name="naziv" placeholder="Naziv" required />
+      <div class="section-title">Sve nagrade</div>
 
-    <input type="text" name="slika" placeholder="URL slike" required />
+      <% if (rewards.length === 0) { %>
+        <div class="empty-state">
+          No rewards 
+        </div>
+      <% } %>
 
-    <input type="number" name="potrebni_bodovi" placeholder="Bodovi" required />
-    <button type="submit">Dodaj</button>
+      <% rewards.forEach(r => { %>
+        <div class="reward-card">
 
-  </form>
+          <img src="<%= r.slika %>"/>
 
-  <hr/>
+          <div class="reward-card-info">
+            <h3><%= r.naziv %></h3>
+            <span class="points-badge"><%= r.potrebni_bodovi %> points</span>
+          </div>
 
-  <!-- SEARCH -->
-  <form method="GET" action="/rewards">
+          <div class="reward-card-actions">
+            <button class="btn-icon" title="Uredi"
+              onclick="openEdit('<%= r.nagrada_id %>', '<%= r.naziv %>', '<%= r.slika %>', '<%= r.potrebni_bodovi %>')"
+            >✏️</button>
 
-    <input
-      type="text"
-      name="search"
-      placeholder="Pretraži nagrade..."
-      value="<%= search %>"
-    >
+            <form action="/rewards/<%= r.nagrada_id %>?_method=DELETE" method="POST">
+              <button type="submit" class="btn-icon danger" title="Obriši">🗑️</button>
+            </form>
+          </div>
 
-    <button type="submit">🔍</button>
-
-  </form>
-
-  <hr/>
-
-  <!-- NAGRADE -->
-  <% rewards.forEach(r => { %>
-
-    <div style="border:1px solid #ccc; padding:15px; margin:15px;">
-
-      <h3><%= r.naziv %></h3>
-
-      <img src="<%= r.slika %>" width="120"/>
-
-      <p>Bodovi: <%= r.potrebni_bodovi %></p>
-
-      <!-- DELETE -->
-      <form
-        action="/rewards/<%= r.nagrada_id %>?_method=DELETE"
-        method="POST"
-      >
-        <button style="color:red;">
-          🗑
-        </button>
-      </form>
-
-      <!-- EDIT BUTTON -->
-      <button onclick="openEdit('<%= r.nagrada_id %>', '<%= r.naziv %>', '<%= r.slika %>', '<%= r.potrebni_bodovi %>')">
-        ✏
-      </button>
+        </div>
+      <% }) %>
 
     </div>
 
-  <% }) %>
+    <div class="modal-overlay" id="editOverlay">
+      <div class="modal">
+        <h2>Uredi nagradu</h2>
+        <form id="editForm" method="POST">
 
-  <!-- EDIT MODAL -->
-  <div
-    id="editModal"
-    style="
-      display:none;
-      position:fixed;
-      top:20%;
-      left:35%;
-      background:white;
-      border:1px solid black;
-      padding:20px;
-    "
-  >
+          <div class="form-group">
+            <label>Naziv</label>
+            <input type="text" name="naziv" id="editNaziv" required />
+          </div>
 
-    <h2>Uredi nagradu</h2>
+          <div class="form-group">
+            <label>URL slike</label>
+            <input type="text" name="slika" id="editSlika" required />
+          </div>
 
-    <form id="editForm" method="POST">
+          <div class="form-group">
+            <label>Potrebni bodovi</label>
+            <input type="number" name="potrebni_bodovi" id="editBodovi" required min="1" />
+          </div>
 
-      <input
-        type="text"
-        name="naziv"
-        id="editNaziv"
-        required
-      >
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeEdit()">Odustani</button>
+            <button type="submit" class="btn btn-primary">Spremi</button>
+          </div>
 
-      <br><br>
+        </form>
+      </div>
+    </div>
 
-      <input
-        type="text"
-        name="slika"
-        id="editSlika"
-        required
-      >
+    <script>
+      function openEdit(id, naziv, slika, bodovi) {
+        document.getElementById("editForm").action = "/rewards/" + id + "?_method=PUT";
+        document.getElementById("editNaziv").value = naziv;
+        document.getElementById("editSlika").value = slika;
+        document.getElementById("editBodovi").value = bodovi;
+        document.getElementById("editOverlay").classList.add("active");
+      }
+      function closeEdit() {
+        document.getElementById("editOverlay").classList.remove("active");
+      }
+      document.getElementById("editOverlay").addEventListener("click", function(e) {
+        if (e.target === this) closeEdit();
+      });
+    </script>
 
-      <br><br>
-
-      <input
-        type="number"
-        name="potrebni_bodovi"
-        id="editBodovi"
-        required
-      >
-
-      <br><br>
-
-      <button type="submit">
-        Spremi
-      </button>
-
-    </form>
-
-    <button onclick="closeEdit()">
-      Odustani
-    </button>
-
-  </div>
-
-  <script>
-
-    function openEdit(id, naziv, slika, bodovi) {
-
-      document.getElementById("editForm").action =
-  "/rewards/" + id + "?_method=PUT";
-
-      document.getElementById("editNaziv").value = naziv;
-
-      document.getElementById("editSlika").value = slika;
-
-      document.getElementById("editBodovi").value = bodovi;
-
-      document.getElementById("editModal").style.display = "block";
-    }
-
-    function closeEdit() {
-      document.getElementById("editModal").style.display = "none";
-    }
-
-  </script>
-
-</body>
+  </body>
 </html>
