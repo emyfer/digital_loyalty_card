@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Korisnici</title>
+</head>
+<body>
+
+  <h1>Pregled korisnika</h1>
+
+  <a href="/rewards">← Natrag na nagrade</a>
+  <a href="/logout" style="margin-left:20px;">Logout</a>
+
+  <hr/>
+
+  <form method="GET" action="/users">
+    <label>Filtriraj po iskorištenoj nagradi:</label>
+
+    <select name="nagrada_id">
+      <option value="">-- svi korisnici --</option>
+      <% nagrade.forEach(n => { %>
+        <option
+          value="<%= n.nagrada_id %>"
+          <%= filterNagradaId === n.nagrada_id ? 'selected' : '' %>
+        >
+          <%= n.naziv %> (<%= n.potrebni_bodovi %> bodova)
+        </option>
+      <% }) %>
+    </select>
+
+    <button type="submit">Filtriraj</button>
+
+    <% if (filterNagradaId) { %>
+      <a href="/users">Poništi filter</a>
+    <% } %>
+  </form>
+
+  <hr/>
+
+  <% if (korisnici.length === 0) { %>
+    <p>Nema korisnika za odabrani filter.</p>
+  <% } else { %>
+    <table border="1" cellpadding="10">
+      <thead>
+        <tr>
+          <th>Ime</th>
+          <th>Email</th>
+          <th>Bodovi</th>
+          <th>Detalji</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% korisnici.forEach(k => { %>
+          <tr>
+            <td><%= k.ime %></td>
+            <td><%= k.email %></td>
+            <td><%= k.broj_bodova %></td>
+            <td>
+              <button onclick="openDetail(
+                '<%= k.ime %>',
+                '<%= k.email %>',
+                '<%= k.broj_bodova %>',
+                '<%= k.korisnik_id %>'
+              )">
+                Pogledaj →
+              </button>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+
+  <div
+    id="detailModal"
+    style="
+      display:none;
+      position:fixed;
+      top:10%;
+      left:25%;
+      width:50%;
+      background:white;
+      border:1px solid black;
+      padding:20px;
+      overflow-y:auto;
+      max-height:75vh;
+    "
+  >
+    <h2 id="modalIme"></h2>
+    <p>Email: <span id="modalEmail"></span></p>
+    <p>Bodovi: <strong id="modalBodovi"></strong></p>
+
+    <hr/>
+
+    <h3>Iskorištene nagrade</h3>
+    <div id="modalIskoristene">
+      <p>Učitavanje...</p>
+    </div>
+
+    <hr/>
+
+    <h3>Transakcije bodova</h3>
+    <div id="modalTransakcije">
+      <p>Učitavanje...</p>
+    </div>
+
+    <br/>
+    <button onclick="closeDetail()">Zatvori</button>
+  </div>
+
+  <script>
+    async function openDetail(ime, email, bodovi, korisnikId) {
+      document.getElementById("modalIme").textContent = ime;
+      document.getElementById("modalEmail").textContent = email;
+      document.getElementById("modalBodovi").textContent = bodovi;
+
+      document.getElementById("modalIskoristene").innerHTML = "<p>Učitavanje...</p>";
+      document.getElementById("modalTransakcije").innerHTML = "<p>Učitavanje...</p>";
+
+      document.getElementById("detailModal").style.display = "block";
+
+      const res = await fetch("/users/" + korisnikId + "/detail");
+      const data = await res.json();
+
+      if (data.iskoristene.length === 0) {
+        document.getElementById("modalIskoristene").innerHTML =
+          "<p>Korisnik još nije iskoristio nijednu nagradu.</p>";
+      } else {
+        let html = "<table border='1' cellpadding='8'><thead><tr><th>Nagrada</th><th>Bodovi</th><th>Datum</th></tr></thead><tbody>";
+        data.iskoristene.forEach(i => {
+          const datum = new Date(i.vrijeme).toLocaleDateString("hr-HR");
+          html += `<tr><td>${i.naziv}</td><td>${i.potrebni_bodovi}</td><td>${datum}</td></tr>`;
+        });
+        html += "</tbody></table>";
+        document.getElementById("modalIskoristene").innerHTML = html;
+      }
+
+      if (data.transakcije.length === 0) {
+        document.getElementById("modalTransakcije").innerHTML =
+          "<p>Korisnik još nema transakcija.</p>";
+      } else {
+        let html = "<table border='1' cellpadding='8'><thead><tr><th>Iznos</th><th>Datum</th></tr></thead><tbody>";
+        data.transakcije.forEach(t => {
+          const datum = new Date(t.vrijeme).toLocaleDateString("hr-HR");
+          html += `<tr><td>+${t.iznos} bod(a)</td><td>${datum}</td></tr>`;
+        });
+        html += "</tbody></table>";
+        document.getElementById("modalTransakcije").innerHTML = html;
+      }
+    }
+
+    function closeDetail() {
+      document.getElementById("detailModal").style.display = "none";
+    }
+  </script>
+
+</body>
+</html>

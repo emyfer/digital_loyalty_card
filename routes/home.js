@@ -24,9 +24,20 @@ router.get("/", async (req, res) => {
     [kartica.broj_bodova]
   );
 
+  // NOVO - dohvati iskorištene nagrade za ovog kupca
+  const iskoristeneResult = await pool.query(
+    `SELECT n.naziv, n.potrebni_bodovi, i.vrijeme
+     FROM iskoristavanje_nagrade i
+     JOIN nagrada n ON n.nagrada_id = i.nagrada_id
+     WHERE i.kartica_id = $1
+     ORDER BY i.vrijeme DESC`,
+    [kartica.kartica_id]
+  );
+
   res.render("home", {
     points: kartica.broj_bodova,
     rewards: nagradeResult.rows,
+    iskoristene: iskoristeneResult.rows, // NOVO
   });
 });
 

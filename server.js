@@ -33,6 +33,8 @@ app.use("/", require("./routes/index"));
 app.use("/home", require("./routes/home"));
 app.use("/rewards", require("./routes/rewards"));
 app.use("/qr_code", require("./routes/qr_code"));
+const usersRouter = require("./routes/users");
+app.use("/users", usersRouter);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

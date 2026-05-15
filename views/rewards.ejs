@@ -1,39 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-  </head>
-  <body>
-    <h1>Upravljanje nagradama</h1>
-    <p>Admin stranica</p>
-    <a href="/logout">Logout</a>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <div>
-      <h1>Upravljanje nagradama</h1>
+  <title>Rewards</title>
+</head>
+<body>
 
-      <form action="/rewards/add" method="POST">
-        <input type="text" name="naziv" placeholder="Naziv" required />
-        <input type="text" name="slika" placeholder="URL slike" required />
-        <input type="number" name="potrebni_bodovi" placeholder="Bodovi" required />
-        <button type="submit">Dodaj</button>
+  <h1>Upravljanje nagradama</h1>
+
+  <a href="/logout">Logout</a>
+  <a href="/users">👥 Pregled korisnika</a>
+
+  <hr/>
+
+  <!-- DODAVANJE -->
+  <form action="/rewards/add" method="POST">
+
+    <input type="text" name="naziv" placeholder="Naziv" required />
+
+    <input type="text" name="slika" placeholder="URL slike" required />
+
+    <input type="number" name="potrebni_bodovi" placeholder="Bodovi" required />
+    <button type="submit">Dodaj</button>
+
+  </form>
+
+  <hr/>
+
+  <!-- SEARCH -->
+  <form method="GET" action="/rewards">
+
+    <input
+      type="text"
+      name="search"
+      placeholder="Pretraži nagrade..."
+      value="<%= search %>"
+    >
+
+    <button type="submit">🔍</button>
+
+  </form>
+
+  <hr/>
+
+  <!-- NAGRADE -->
+  <% rewards.forEach(r => { %>
+
+    <div style="border:1px solid #ccc; padding:15px; margin:15px;">
+
+      <h3><%= r.naziv %></h3>
+
+      <img src="<%= r.slika %>" width="120"/>
+
+      <p>Bodovi: <%= r.potrebni_bodovi %></p>
+
+      <!-- DELETE -->
+      <form
+        action="/rewards/<%= r.nagrada_id %>?_method=DELETE"
+        method="POST"
+      >
+        <button style="color:red;">
+          🗑
+        </button>
       </form>
 
-      <hr/>
+      <!-- EDIT BUTTON -->
+      <button onclick="openEdit('<%= r.nagrada_id %>', '<%= r.naziv %>', '<%= r.slika %>', '<%= r.potrebni_bodovi %>')">
+        ✏
+      </button>
 
-      <% rewards.forEach(r => { %>
-        <div style="border:1px solid #ccc; padding:10px; margin:10px;">
-          <h3><%= r.naziv %></h3>
-          <img src="<%= r.slika %>" width="100" />
-
-          <p>Bodovi: <%= r.potrebni_bodovi %></p>
-
-          <form action="/rewards/<%= r.nagrada_id %>?_method=DELETE" method="POST">
-            <button style="color:red;">🗑 Delete</button>
-          </form>
-        </div>
-      <% }) %>
     </div>
-  </body>
+
+  <% }) %>
+
+  <!-- EDIT MODAL -->
+  <div
+    id="editModal"
+    style="
+      display:none;
+      position:fixed;
+      top:20%;
+      left:35%;
+      background:white;
+      border:1px solid black;
+      padding:20px;
+    "
+  >
+
+    <h2>Uredi nagradu</h2>
+
+    <form id="editForm" method="POST">
+
+      <input
+        type="text"
+        name="naziv"
+        id="editNaziv"
+        required
+      >
+
+      <br><br>
+
+      <input
+        type="text"
+        name="slika"
+        id="editSlika"
+        required
+      >
+
+      <br><br>
+
+      <input
+        type="number"
+        name="potrebni_bodovi"
+        id="editBodovi"
+        required
+      >
+
+      <br><br>
+
+      <button type="submit">
+        Spremi
+      </button>
+
+    </form>
+
+    <button onclick="closeEdit()">
+      Odustani
+    </button>
+
+  </div>
+
+  <script>
+
+    function openEdit(id, naziv, slika, bodovi) {
+
+      document.getElementById("editForm").action =
+  "/rewards/" + id + "?_method=PUT";
+
+      document.getElementById("editNaziv").value = naziv;
+
+      document.getElementById("editSlika").value = slika;
+
+      document.getElementById("editBodovi").value = bodovi;
+
+      document.getElementById("editModal").style.display = "block";
+    }
+
+    function closeEdit() {
+      document.getElementById("editModal").style.display = "none";
+    }
+
+  </script>
+
+</body>
 </html>

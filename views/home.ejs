@@ -7,6 +7,8 @@
     </head>
     <body>
         <h1>Moji bodovi: <%= points %></h1>
+          <a href="/logout">Logout</a>
+
 
         <h2>Dostupne nagrade</h2>
 
@@ -31,6 +33,38 @@
 
             <button onclick="closeModal()">Odustani</button>
         </div>
+
+        <hr/>
+
+        <!-- MASTER: kartica korisnika -->
+        <h2>Moja kartica lojalnosti</h2>
+        <p>Trenutni bodovi: <strong><%= points %></strong></p>
+
+        <!-- DETAIL: iskorištene nagrade -->
+        <h3>Iskorištene nagrade</h3>
+
+        <% if (iskoristene.length === 0) { %>
+        <p>Još nisi iskoristio/la nijednu nagradu.</p>
+        <% } else { %>
+        <table border="1" cellpadding="8">
+            <thead>
+            <tr>
+                <th>Nagrada</th>
+                <th>Bodovi</th>
+                <th>Datum</th>
+            </tr>
+            </thead>
+            <tbody>
+            <% iskoristene.forEach(i => { %>
+                <tr>
+                <td><%= i.naziv %></td>
+                <td><%= i.potrebni_bodovi %></td>
+                <td><%= new Date(i.vrijeme).toLocaleDateString('hr-HR') %></td>
+                </tr>
+            <% }) %>
+            </tbody>
+        </table>
+        <% } %>
 
         <script>
             function openModal(id) {
