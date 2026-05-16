@@ -25,24 +25,23 @@
 
             <div class="card">
 
-            <h1>Caffee managment</h1>
+                <h1>Caffee managment</h1>
 
-            <div class="cafe-actions">
-                <form action="/qr_code/open" method="POST">
-                <button class="btn btn-primary" type="submit">
-                    Open caffee
-                </button>
+                <div class="cafe-actions">
+                    <form action="/qr_code/open" method="POST">
+                        <button class="btn btn-primary" type="submit">
+                            Open caffee
+                        </button>
 
-                </form>
+                    </form>
+                    <form action="/qr_code/close" method="POST">
+                        <button class="btn btn-danger" type="submit">
+                            ✕ Close caffee
+                        </button>
 
-                <form action="/qr_code/close" method="POST">
-                <button class="btn btn-danger" type="submit">
-                    ✕ Close caffee
-                </button>
+                    </form>
 
-                </form>
-
-            </div>
+                </div>
 
             </div>
 
@@ -51,23 +50,18 @@
             </div>
 
             <% if (activeCode) { %>
-            <div class="qr-wrapper">
-                <div class="qr-box">
-                <img
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=http://localhost:3000/home/scan?kod_id=<%= activeCode.kod_id %>">
+                <div class="qr-wrapper">
+                    <div class="qr-box">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=http://localhost:3000/home/scan?kod_id=<%= activeCode.kod_id %>">
+                    </div>
+
+                    <div class="card" style="text-align:center; width:100%; max-width:420px;">
+                        <span class="points-badge">Valid for 30 minutes</span>
+                        <p style="margin-top:.8rem; font-size:.9rem; color:var(--text-muted);">
+                        Istječe za: <strong id="countdown" style="color:var(--navy);" data-seconds="<%= secondsLeft %>"></strong>
+                        </p>
+                    </div>
                 </div>
-
-                <div class="card" style="text-align:center; width:100%; max-width:420px;">
-                <div style="margin-top: 1 rem;">
-                    <span class="points-badge">
-                        Valid for 30 minutes
-                    </span>
-
-                </div>
-
-                </div>
-
-            </div>
 
             <% } else { %>
 
@@ -82,6 +76,27 @@
             <% } %>
 
         </div>
+
+        <script>
+            const el = document.getElementById("countdown");
+            if (el) {
+                let seconds = parseInt(el.getAttribute("data-seconds")) || 0;
+
+                function updateTimer() {
+                    if (seconds <= 0) {
+                        window.location.reload();
+                        return;
+                    }
+                    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                    const s = (seconds % 60).toString().padStart(2, '0');
+                    el.textContent = m + ":" + s;
+                    seconds--;
+                    setTimeout(updateTimer, 1000);
+                }
+
+                updateTimer();
+            }
+            </script>
 
     </body>
 </html>
