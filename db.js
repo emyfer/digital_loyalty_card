@@ -1,21 +1,14 @@
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 
-/*const pool = new Pool({
+const isTest = process.env.NODE_ENV === "test"; // zasebna baza za testiranje
+
+const pool = new Pool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
-  database: process.env.DATABASE,
-});
-pool.connect().then(() => console.log("connected"));*/
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  database: isTest ? "loyalty_card_test" : process.env.DATABASE,
 });
 pool.connect().then(() => console.log("connected"));
 
-
-module.exports = pool
+module.exports = pool;
