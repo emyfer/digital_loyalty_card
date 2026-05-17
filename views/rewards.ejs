@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
     <link rel="stylesheet" href="/style.css">
   </head>
   <body>
@@ -25,9 +26,9 @@
         <form action="/rewards/add" method="POST">
           <div class="add-form">
             <input type="text" name="naziv" placeholder="Reward name" required />
-            <input type="text" name="slika" placeholder="picture URL" required />
+            <input type="text" name="slika" placeholder="image URL" required />
             <input type="number" name="potrebni_bodovi" placeholder="Points" required min="1" />
-            <button type="submit" class="btn btn-primary">+ Add</button>
+            <button type="submit" class="btn btn-primary">Add</button>
           </div>
         </form>
       </div>
@@ -63,12 +64,12 @@
           </div>
 
           <div class="reward-card-actions">
-            <button class="btn-icon" title="Uredi"
+            <button class="btn-icon"
               onclick="openEdit('<%= r.nagrada_id %>', '<%= r.naziv %>', '<%= r.slika %>', '<%= r.potrebni_bodovi %>')"
-            >✏️</button>
+            ><i class="fa-solid fa-pencil"></i></button>
 
             <form action="/rewards/<%= r.nagrada_id %>?_method=DELETE" method="POST">
-              <button type="submit" class="btn-icon danger" title="Obriši">🗑️</button>
+              <button type="submit" class="btn-icon danger"><i class="fa-solid fa-trash"></i></button>
             </form>
           </div>
 
@@ -79,27 +80,27 @@
 
     <div class="modal-overlay" id="editOverlay">
       <div class="modal">
-        <h2>Uredi nagradu</h2>
+        <h2>Update reward</h2>
         <form id="editForm" method="POST">
 
           <div class="form-group">
-            <label>Naziv</label>
+            <label>Name</label>
             <input type="text" name="naziv" id="editNaziv" required />
           </div>
 
           <div class="form-group">
-            <label>URL slike</label>
+            <label>Image Url</label>
             <input type="text" name="slika" id="editSlika" required />
           </div>
 
           <div class="form-group">
-            <label>Potrebni bodovi</label>
+            <label>Points</label>
             <input type="number" name="potrebni_bodovi" id="editBodovi" required min="1" />
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="closeEdit()">Odustani</button>
-            <button type="submit" class="btn btn-primary">Spremi</button>
+            <button type="button" class="btn btn-outline" onclick="closeEdit()">Cancle</button>
+            <button type="submit" class="btn btn-primary">Save</button>
           </div>
 
         </form>

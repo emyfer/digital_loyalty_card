@@ -116,7 +116,7 @@ router.get("/scan", async (req, res) => {
     );
 
     if (kodResult.rows.length === 0) {
-      throw new Error("QR kod nije valjan");
+      throw new Error("QR code not valid");
     }
 
     const karticaResult = await client.query(
@@ -137,7 +137,7 @@ router.get("/scan", async (req, res) => {
     );
 
     if (exists.rows.length > 0) {
-      throw new Error("Već iskorišten kod");
+      throw new Error("Already used");
     }
 
     await client.query(

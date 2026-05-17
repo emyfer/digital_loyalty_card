@@ -25,39 +25,16 @@ router.get("/", async (req, res) => {
   const admin = await isSuperAdmin(korisnikId);
   if (!admin) return res.status(403).send("Access denied");
 
-  const filterNagradaId = req.query.nagrada_id || "";
-
-  const nagradeResult = await pool.query(
-    "SELECT * FROM nagrada ORDER BY naziv"
+  const korisnici = await pool.query(
+    `SELECT k.korisnik_id, k.ime, k.email, kl.broj_bodova, kl.kartica_id
+     FROM korisnik k
+     JOIN kupac ku ON ku.korisnik_id = k.korisnik_id
+     JOIN kartica_lojalnosti kl ON kl.korisnik_id = k.korisnik_id
+     ORDER BY k.ime`
   );
 
-  let korisnici;
-  if (filterNagradaId) {
-    korisnici = await pool.query(
-      `SELECT DISTINCT k.korisnik_id, k.ime, k.email, kl.broj_bodova, kl.kartica_id
-       FROM korisnik k
-       JOIN kupac ku ON ku.korisnik_id = k.korisnik_id
-       JOIN kartica_lojalnosti kl ON kl.korisnik_id = k.korisnik_id
-       JOIN iskoristavanje_nagrade i ON i.kartica_id = kl.kartica_id
-       WHERE i.nagrada_id = $1 AND k.uloga = 'kupac'
-       ORDER BY k.ime`,
-      [filterNagradaId]
-    );
-  } else {
-    korisnici = await pool.query(
-      `SELECT k.korisnik_id, k.ime, k.email, kl.broj_bodova, kl.kartica_id
-       FROM korisnik k
-       JOIN kupac ku ON ku.korisnik_id = k.korisnik_id
-       JOIN kartica_lojalnosti kl ON kl.korisnik_id = k.korisnik_id
-       WHERE k.uloga = 'kupac'
-       ORDER BY k.ime`
-    );
-  }
-
   res.render("users", {
-    korisnici: korisnici.rows,
-    nagrade: nagradeResult.rows,
-    filterNagradaId,
+    korisnici: korisnici.rows
   });
 });
 
@@ -91,18 +68,7 @@ router.get("/:id/detail", async (req, res) => {
     [kartica.kartica_id]
   );
 
-  const transakcije = await pool.query(
-    `SELECT t.iznos, t.vrijeme
-     FROM transakcija_bodova t
-     WHERE t.kartica_id = $1
-     ORDER BY t.vrijeme DESC`,
-    [kartica.kartica_id]
-  );
-
-  res.json({
-    iskoristene: iskoristene.rows,
-    transakcije: transakcije.rows,
-  });
+  res.json({ iskoristene: iskoristene.rows });
 });
 
 module.exports = router;
