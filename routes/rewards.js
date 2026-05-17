@@ -90,8 +90,6 @@ router.delete("/:id", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-  console.log("PUT hit, id:", req.params.id, "body:", req.body);
-
 
   const auth0Id = req.oidc.user.sub;
 
